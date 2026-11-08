@@ -1,8 +1,14 @@
 param([string]$Sdk=$env:ANDROID_SDK_ROOT,[string]$Jdk=$env:JAVA_HOME,[string]$SigningKey='')
 
-. (Join-Path $PSScriptRoot '../tools/environment.ps1')
-$Jdk=Resolve-GameJdk $Jdk
-$Sdk=Resolve-GameSdk $Sdk
+$environmentHelper=Join-Path $PSScriptRoot '../tools/environment.ps1'
+if(Test-Path -LiteralPath $environmentHelper){
+    . $environmentHelper
+    $Jdk=Resolve-GameJdk $Jdk
+    $Sdk=Resolve-GameSdk $Sdk
+}elseif(!$Jdk -or !$Sdk -or !(Test-Path -LiteralPath (Join-Path $Jdk 'bin/javac.exe')) -or !(Test-Path -LiteralPath (Join-Path $Sdk 'platforms/android-35/android.jar'))){
+    # The ASCII drive maps app/ only; its recursive call already resolved these paths.
+    throw 'Pass valid -Jdk and -Sdk directories when building through a mapped app directory.'
+}
 $ErrorActionPreference='Stop'
 $projectPath=$PSScriptRoot
 if(!$SigningKey){$SigningKey=Join-Path $projectPath 'build\debug.keystore'}
@@ -17,7 +23,7 @@ if($projectPath -match '[^\x00-\x7F]'){
 }
 $rolePath=Join-Path $projectPath 'build\unified'
 $buildPath=Join-Path $rolePath ('compile-'+[guid]::NewGuid().ToString('N').Substring(0,8))
-if(!(Test-Path -LiteralPath "$projectPath\assets\game.swf")){throw 'Run tools/prepare.py with your original SWF before building.'}
+if(!(Test-Path -LiteralPath "$projectPath\assets\game.swf")){throw 'Run tools/fetch-original.py and swf/build.ps1 before building.'}
 $env:JAVA_HOME=$Jdk
 $env:PATH="$Jdk\bin;$env:PATH"
 $bt=Join-Path $Sdk 'build-tools\35.0.1'
