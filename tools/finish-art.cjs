@@ -1,0 +1,2 @@
+const sharp=require('sharp'),path=require('path');const art=path.resolve(__dirname,'../art/imagen');
+(async()=>{await sharp(art+'/localized/9001.png').rotate(90).resize(165,685,{fit:'contain',background:'#00000000'}).png().toFile(art+'/runtime/9001.png');await sharp(art+'/localized/9002.png').resize(346,116,{fit:'contain',background:'#00000000'}).png().toFile(art+'/runtime/9002.png')})().catch(e=>{console.error(e);process.exitCode=1});

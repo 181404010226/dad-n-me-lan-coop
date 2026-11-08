@@ -1,0 +1,41 @@
+import java.io.*;import java.nio.file.*;import java.util.*;
+import com.jpexs.decompiler.flash.*;import com.jpexs.decompiler.flash.tags.*;import com.jpexs.decompiler.flash.tags.base.*;import com.jpexs.decompiler.flash.timeline.Timelined;import com.jpexs.decompiler.flash.action.parser.script.ActionScript2Parser;
+/** Original artwork library and frame selectors; removes every original guest action. */
+public class Presentation{
+ static Map<Integer,Boolean> pureCache=new HashMap<>();static Map<Integer,Set<Integer>> staticSlots=new HashMap<>();
+ static boolean guestBuilding;static Set<String> permitted=new HashSet<>();
+ static String hash(byte[] b)throws Exception{return HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(b));}
+ static DoActionTag action(SWF s,String code)throws Exception{DoActionTag t=new DoActionTag(s);t.setActions(new ActionScript2Parser(s,t).actionsFromString(code,s.getCharset()));t.setModified();if(guestBuilding)permitted.add(hash(t.getActionBytes().getRangeData()));return t;}
+ static boolean pure(SWF s,int id){if(pureCache.containsKey(id))return pureCache.get(id);CharacterTag c=s.getCharacter(id);if(c instanceof DefineEditTextTag)return false;if(!(c instanceof DefineSpriteTag sp))return true;pureCache.put(id,false);if(sp.frameCount!=1)return false;for(Tag t:sp.getTags()){if(t instanceof DoActionTag||t instanceof DoInitActionTag||t instanceof StartSoundTag)return false;if(t instanceof PlaceObjectTypeTag po&&(po.getClipActions()!=null||po.getCharacterId()>0&&!pure(s,po.getCharacterId())))return false;}pureCache.put(id,true);return true;}
+ static void slots(SWF s,Timelined timeline,int id){Map<Integer,Boolean> allowed=new TreeMap<>();for(Tag t:timeline.getTags())if(t instanceof PlaceObjectTypeTag po){if(po.getCharacterId()>0&&s.getCharacter(po.getCharacterId()) instanceof DefineSpriteTag){boolean ok=po.getInstanceName()==null&&po.getClipActions()==null&&pure(s,po.getCharacterId());allowed.put(po.getDepth(),allowed.getOrDefault(po.getDepth(),true)&&ok);}else if(po.getClipActions()!=null)allowed.put(po.getDepth(),false);}Set<Integer> depths=new TreeSet<>();for(var e:allowed.entrySet())if(e.getValue())depths.add(e.getKey()-16384);staticSlots.put(id,depths);}
+ static String slotCode(int id){StringJoiner j=new StringJoiner(",","{","}");for(int d:staticSlots.getOrDefault(id,Set.of()))j.add("d"+(d+16384)+":true");return j.toString();}
+ static void analyze(SWF s){slots(s,s,7999);for(CharacterTag c:new TreeMap<>(s.getCharacters(false)).values())if(c instanceof DefineSpriteTag sp)slots(s,sp,sp.spriteId);}
+ static void mark(SWF s)throws Exception{s.addTag(0,action(s,"this.__vizStatic="+slotCode(7999)+";"));for(CharacterTag c:new TreeMap<>(s.getCharacters(false)).values())if(c instanceof DefineSpriteTag sp){int at=0;for(Tag t:sp.getTags()){if(t instanceof ShowFrameTag)break;at++;}sp.addTag(at,action(s,"if(this.__vizSym==undefined){this.__vizSym="+sp.spriteId+";this.__vizStatic="+slotCode(sp.spriteId)+";this._parent.__vizDirty=true;}"));sp.setModified(true);}}
+ static int stripped,placements,masks,textBindings;
+ static void audio(SWF s,Timelined timeline)throws Exception{for(Tag t:new ArrayList<>(timeline.getTags().toArrayList())){if(t instanceof StartSoundTag sound){var info=sound.soundInfo;String code="if(_root.coopNativeSound!=undefined)_root.coopNativeSound(\"vizS"+sound.soundId+"\","+(info.hasInPoint?info.inPoint/44100.:0)+","+(info.hasLoops?info.loopCount:1)+","+info.syncStop+",String(this)+\"_"+sound.soundId+"\");";timeline.addTag(timeline.indexOfTag(t),action(s,code));t.setModified(true);}if(t instanceof DoActionTag code&&new String(code.getActionBytes().getRangeData(),java.nio.charset.StandardCharsets.ISO_8859_1).contains("attachSound"))timeline.addTag(timeline.indexOfTag(t)+1,action(s,"if(_root.coopBindSounds!=undefined)_root.coopBindSounds(this);"));if(t instanceof DoActionTag code&&code.getActions().stream().anyMatch(op->op.getClass().getSimpleName().equals("ActionStopSounds")))timeline.addTag(timeline.indexOfTag(t)+1,action(s,"if(_level0.visualStopSounds!=undefined)_level0.visualStopSounds();"));if(t instanceof DefineSpriteTag sp)audio(s,sp);}}
+ static void strip(SWF s,Timelined timeline)throws Exception{
+  Map<Integer,Integer> depths=new HashMap<>();Set<Integer> maskDepths=new HashSet<>();
+  for(Tag t:new ArrayList<>(timeline.getTags().toArrayList())){
+   if(t instanceof DoActionTag||t instanceof DoInitActionTag||t instanceof StartSoundTag||t instanceof SoundStreamHeadTag||t instanceof SoundStreamHead2Tag||t instanceof SoundStreamBlockTag){timeline.removeTag(t);stripped++;continue;}
+   if(t instanceof DefineEditTextTag tf&&!tf.variableName.isEmpty()){tf.variableName="";tf.setModified(true);textBindings++;}
+   if(t instanceof PlaceObjectTypeTag po&&po.getClipActions()!=null){po.setClipActions(null);po.setPlaceFlagHasClipActions(false);t.setModified(true);stripped++;}
+   if(t instanceof PlaceObjectTypeTag po){if(po.getCharacterId()>0)depths.put(po.getDepth(),po.getCharacterId());if(po.getClipDepth()>0)maskDepths.add(po.getDepth());if(s.getCharacter(depths.getOrDefault(po.getDepth(),-1)) instanceof DefineSpriteTag){if(maskDepths.contains(po.getDepth())){masks++;}else if(!staticSlots.getOrDefault(timeline instanceof DefineSpriteTag sp?sp.spriteId:7999,Set.of()).contains(po.getDepth()-16384)){timeline.removeTag(t);placements++;continue;}}}
+   if(t instanceof DefineButton2Tag bt){bt.actions.clear();bt.setModified(true);}else if(t instanceof DefineButtonTag bt){bt.setActions(new ArrayList<>());bt.setModified();}
+   if(t instanceof DefineSpriteTag sp){strip(s,sp);sp.addTag(0,action(s,"this.__vizSym="+sp.spriteId+";this.__vizStatic="+slotCode(sp.spriteId)+";stop();"));sp.setModified(true);}
+  }
+ }
+ public static void main(String[]a)throws Exception{
+  SWF host=new SWF(new FileInputStream(a[0]),false);analyze(host);mark(host);audio(host,host);try(var out=new FileOutputStream(a[1])){host.saveTo(out);}
+  guestBuilding=true;SWF view=new SWF(new FileInputStream(a[0]),false);view.version=8;strip(view,view);
+  DefineSpriteTag root=new DefineSpriteTag(view);root.spriteId=7999;root.frameCount=view.frameCount;
+  for(Tag t:new ArrayList<>(view.getTags().toArrayList()))if(t instanceof PlaceObjectTypeTag||t instanceof RemoveObjectTag||t instanceof RemoveObject2Tag||t instanceof ShowFrameTag||t instanceof FrameLabelTag){view.removeTag(t);root.addTag(t);}
+  root.addTag(0,action(view,"this.__vizSym=7999;this.__vizStatic="+slotCode(7999)+";stop();"));view.addTag(root);view.frameCount=1;
+  ExportAssetsTag aliases=new ExportAssetsTag(view);for(CharacterTag c:new TreeMap<>(view.getCharacters(false)).values()){if(c instanceof DefineSpriteTag){aliases.tags.add(c.getCharacterId());aliases.names.add("viz"+c.getCharacterId());}else if(c instanceof DefineSoundTag){aliases.tags.add(c.getCharacterId());aliases.names.add("vizS"+c.getCharacterId());}}aliases.tags.add(7999);aliases.names.add("vizRoot");view.addTag(aliases);
+  StringJoiner registry=new StringJoiner(",","var visualSlots={","};\n");for(var e:new TreeMap<>(staticSlots).entrySet())registry.add("s"+e.getKey()+":"+slotCode(e.getKey()));
+  view.addTag(action(view,registry.toString()+Files.readString(Path.of(a[3]))));view.addTag(new ShowFrameTag(view));
+  try(var out=new FileOutputStream(a[2])){view.saveTo(out);}SWF checked=new SWF(new FileInputStream(a[2]),false);int blocks=0;for(var source:checked.getASMs(false).values()){byte[] code=source.getActionBytes().getRangeData();if(code.length>0&&!permitted.contains(hash(code)))throw new IllegalStateException("Unexpected original code in view library");blocks++;}
+  String audit="{\"originalGuestActionsAndSoundTriggersRemoved\":"+stripped+",\"guestMetadataAndRendererBlocks\":"+blocks+",\"allGuestCodeMatchesGeneratedAllowlist\":true,\"removedControlledMovieClipPlacements\":"+placements+",\"retainedMovieClipMasks\":"+masks+",\"guestLegacyTextBindingsCleared\":"+textBindings+",\"originalRuleCodeInGuest\":false}";
+  Files.writeString(Path.of(a[2]).resolveSibling("presentation-audit.json"),audit);
+  System.out.println("Presentation: stripped original actions/sound triggers="+stripped+", exported sprites="+aliases.tags.size()+", MC placements="+placements+", MC masks="+masks+", guest code allowlist verified="+blocks);System.exit(0);
+ }
+}

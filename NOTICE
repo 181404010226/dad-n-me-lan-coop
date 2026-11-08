@@ -1,0 +1,7 @@
+Dad n’ Me / RGM-36 LAN co-op adaptation.
+Original SWF: https://rgm.games/api/roms/36.swf
+Original game artwork, audio and game logic remain the property of their authors.
+This project does not relicense the original game.
+Room shell adapted from classic-swf-coop (MIT); Ruffle licenses are in app/assets/ruffle.
+QR encoder license is in licenses/node-qrcode-MIT.txt.
+FFDec 26.4.0 is an external GPL tool and is not bundled.

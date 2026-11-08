@@ -1,0 +1,15 @@
+'use strict';
+class GameInput{
+ constructor(change){this.change=change;this.enabled=null;this.keys=new Set();this.pointers=new Map();this.stick=0;this.pointer=null;this.joy=document.querySelector('#joystick');this.knob=document.querySelector('#stick-knob');this.mapping={ArrowLeft:1,ArrowRight:2,ArrowUp:4,ArrowDown:8,KeyA:16,KeyJ:16,KeyS:32,KeyK:32};const bits={light:16,heavy:32,both:48};
+  for(const b of document.querySelectorAll('[data-control]')){b.addEventListener('pointerdown',e=>{e.preventDefault();if(!this.enabled)return;b.setPointerCapture(e.pointerId);this.pointers.set(e.pointerId,bits[b.dataset.control]);b.classList.add('pressed');this.emit()});for(const type of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(type,e=>{e.preventDefault();if(!this.pointers.delete(e.pointerId))return;if(![...this.pointers.values()].includes(bits[b.dataset.control]))b.classList.remove('pressed');this.emit()});b.oncontextmenu=e=>e.preventDefault()}
+  this.joy.addEventListener('pointerdown',e=>{e.preventDefault();if(!this.enabled||this.pointer!==null)return;this.pointer=e.pointerId;this.joy.setPointerCapture(e.pointerId);this.move(e)});this.joy.addEventListener('pointermove',e=>this.move(e));for(const type of ['pointerup','pointercancel','lostpointercapture'])this.joy.addEventListener(type,e=>{if(e.pointerId!==this.pointer)return;e.preventDefault();this.resetStick();this.emit()});this.joy.oncontextmenu=e=>e.preventDefault();
+  window.addEventListener('keydown',e=>{if(!this.enabled||!this.mapping[e.code]||e.target.matches('input,select'))return;e.preventDefault();if(!e.repeat){this.keys.add(e.code);this.emit()}});window.addEventListener('keyup',e=>{if(this.keys.delete(e.code))this.emit()});window.addEventListener('blur',()=>this.release());document.addEventListener('visibilitychange',()=>{if(document.hidden)this.release()});this.setEnabled(false);
+ }
+ move(e){if(e.pointerId!==this.pointer)return;const b=this.joy.getBoundingClientRect(),r=b.width*.32;let x=e.clientX-b.x-b.width/2,y=e.clientY-b.y-b.height/2,d=Math.hypot(x,y);if(d>r){x*=r/d;y*=r/d}this.knob.style.transform=`translate(calc(-50% + ${x}px),calc(-50% + ${y}px))`;const next=d>b.width*.1?[2,10,8,9,1,5,4,6][(Math.round(Math.atan2(y,x)/(Math.PI/4))+8)%8]:0;if(next!==this.stick){this.stick=next;this.emit()}}
+ resetStick(){this.pointer=null;this.stick=0;this.knob.style.transform='translate(-50%,-50%)'}
+ mask(){let m=this.stick;for(const k of this.keys)m|=this.mapping[k];for(const v of this.pointers.values())m|=v;return m}
+ emit(){this.change(this.enabled?this.mask():0)}
+ release(force=false){const held=this.mask();this.keys.clear();this.pointers.clear();this.resetStick();document.querySelectorAll('[data-control]').forEach(b=>b.classList.remove('pressed'));if(held||force)this.change(0)}
+ setEnabled(value){value=!!value;if(value===this.enabled)return;if(this.enabled&&!value)this.release(true);this.enabled=!!value;document.querySelectorAll('[data-control]').forEach(b=>b.disabled=!value);this.joy.setAttribute('aria-disabled',String(!value))}
+}
+window.GameInput=GameInput;

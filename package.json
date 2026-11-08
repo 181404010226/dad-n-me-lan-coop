@@ -1,0 +1,21 @@
+{
+  "name": "rgm36-lan-coop",
+  "version": "0.5.0",
+  "private": true,
+  "scripts": {
+    "test:pc": "node tools/test-pc.cjs",
+    "test:features": "node tools/test-features.cjs",
+    "test:hazards": "node tools/test-hazards.cjs",
+    "test:auto": "node tools/test-authority.cjs",
+    "test:performance": "node tools/test-authority.cjs --benchmark",
+    "test:hazard-room": "node tools/test-authority-hazards.cjs",
+    "test:intro-exit": "node tools/test-intro-exit.cjs",
+    "test:authority": "node tools/test-authority.cjs",
+    "test:authority-hazards": "node tools/test-authority-hazards.cjs",
+    "test:visual-rules": "node tools/test-visual-rules.cjs",
+    "test:presentation": "node tools/test-presentation-buffer.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.64.1"
+  }
+}

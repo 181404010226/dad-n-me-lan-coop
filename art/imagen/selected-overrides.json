@@ -1,0 +1,14 @@
+{
+  "1207": {
+    "master": "asset-master-1207.png",
+    "reason": "Restore omitted 小 in title"
+  },
+  "1950": {
+    "master": "asset-master-1950.png",
+    "reason": "Correct Cookie Dough Records translation to 曲奇面团唱片"
+  },
+  "2036": {
+    "master": "asset-master-2036-correction.png",
+    "reason": "Correct same brand in credits card"
+  }
+}

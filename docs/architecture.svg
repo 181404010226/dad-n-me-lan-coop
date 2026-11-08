@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1630" viewBox="0 0 1500 1630" role="img" aria-labelledby="title desc"><title id="title">房主权威状态，双方本地绘制</title><desc id="desc">同一个 APK 自动配对；房主执行唯一游戏规则；搭档上传操作，接收完整显示状态并使用本地原素材绘制。状态确认与最新帧替换限制积压；搭档重连不回放游戏。</desc><defs><marker id="blue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#2563eb"/></marker><marker id="green" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#078567"/></marker></defs><style>text{font-family:'Microsoft YaHei','Noto Sans CJK SC',sans-serif;fill:#192c43}.title{font-size:38px;font-weight:700}.h{font-size:29px;font-weight:700}.body{font-size:24px}.small{font-size:21px}.muted{fill:#50647c}.blue{fill:#2563eb}.green{fill:#078567}.bold{font-weight:700}</style><rect width="1500" height="1630" fill="#eef3f9"/>
+<text x="54" y="65" class="title">已选方案：房主权威状态，双方本地绘制</text>
+<text x="56" y="110" class="body muted">规则只在房主执行；搭档根据权威状态，用 APK 内的原素材绘制画面。</text>
+<rect x="44" y="142" width="1412" height="135" rx="20" fill="#e8f1ff" stroke="#c5d8f3" stroke-width="2"/>
+<text x="72" y="184" class="h">连接层保持不变</text>
+<text x="72" y="229" class="body">同一个 APK → 同网发现 → 自动选房主 → 锁定搭档与座位 → 建立连接</text>
+<rect x="44" y="303" width="560" height="560" rx="20" fill="#fff" stroke="#b7cdec" stroke-width="2"/>
+<rect x="896" y="303" width="560" height="560" rx="20" fill="#fff" stroke="#a4d7c6" stroke-width="2"/>
+<text x="76" y="351" class="h">房主手机 · 唯一规则执行端</text>
+<text x="76" y="394" class="body muted">接收双方的摇杆、轻击、重击和组合技</text>
+<rect x="76" y="427" width="496" height="178" rx="14" fill="#eef4ff"/>
+<text x="100" y="469" class="body bold">原版规则：每秒 30 个逻辑帧</text>
+<text x="100" y="510" class="body">移动 / 连招 / 碰撞 / 生命 / 怒气</text>
+<text x="100" y="551" class="body">敌人 AI / 道具 / 爆炸 / 关卡 / 镜头</text>
+<text x="100" y="587" class="small muted">所有命中与过关结果由这里判定</text>
+<rect x="76" y="627" width="496" height="103" rx="14" fill="#f2f5fa"/>
+<text x="100" y="668" class="body bold">本地显示：保留房主原游戏画面</text>
+<text x="100" y="705" class="small muted">提取显示状态、HUD 与音效事件</text>
+<text x="76" y="777" class="body muted">房主自身性能不足，仍会影响双方。</text>
+<text x="76" y="818" class="small muted">保留煤气罐解锁、输入租约与暂停保护。</text>
+<text x="928" y="351" class="h">搭档手机 · 本地显示端</text>
+<text x="928" y="394" class="body muted">原游戏规则脚本已从显示副本中移除</text>
+<rect x="928" y="427" width="496" height="178" rx="14" fill="#edf9f3"/>
+<text x="952" y="469" class="body bold">本地已有原图形、字体、动画与声音</text>
+<text x="952" y="510" class="body">应用素材编号、动作帧、位置与颜色</text>
+<text x="952" y="551" class="body">绘制人物 / 敌人 / 场景 / 道具 / HUD</text>
+<text x="952" y="587" class="small muted">移动做短缓冲插值，不预判命中和伤害</text>
+<rect x="928" y="627" width="496" height="103" rx="14" fill="#f2f5fa"/>
+<text x="952" y="668" class="body bold">只上传自己的操作，按钮即时反馈</text>
+<text x="952" y="705" class="small muted">不计算第二份 AI、碰撞、掉血或过关</text>
+<text x="928" y="777" class="body muted">无需两台手机逐帧保持相同模拟。</text>
+<text x="928" y="818" class="small muted">显示端恢复时，直接接收最新完整状态。</text>
+<path d="M875 470L625 470" stroke="#2563eb" stroke-width="4" fill="none" marker-end="url(#blue)"/>
+<text x="750" y="441" class="body blue" text-anchor="middle">操作输入</text>
+<text x="750" y="511" class="small muted" text-anchor="middle">序号 + 座位身份</text>
+<path d="M625 607L875 607" stroke="#078567" stroke-width="4" fill="none" marker-end="url(#green)"/>
+<text x="750" y="579" class="body green" text-anchor="middle">完整显示状态</text>
+<text x="750" y="648" class="small muted" text-anchor="middle">局代次 / 显示流 / 帧号</text>
+<path d="M875 758L625 758" stroke="#2563eb" stroke-width="4" fill="none" marker-end="url(#blue)"/>
+<text x="750" y="732" class="small blue" text-anchor="middle">应用状态后确认</text>
+<rect x="44" y="886" width="1412" height="143" rx="20" fill="#eaf6f0"/>
+<text x="72" y="931" class="h">网络里传什么？</text>
+<text x="72" y="974" class="body">传实例 / 素材编号、动作帧、变换、颜色、HUD、音效事件；静态美术留在本机。</text>
+<text x="72" y="1010" class="small muted">这是显示状态同步，不是视频串流；这些状态用于绘制，不用于把搭档变成备用房主。</text>
+<rect x="44" y="1052" width="1412" height="240" rx="20" fill="#fff"/>
+<text x="72" y="1097" class="h">慢设备与弱网：只保留最新状态，避免越积越多</text>
+<rect x="76" y="1120" width="390" height="60" rx="12" fill="#eef3fb"/>
+<text x="271.0" y="1158" class="small bold" text-anchor="middle">① 最多一个状态包等待确认</text>
+<rect x="554" y="1120" width="390" height="60" rx="12" fill="#eef3fb"/>
+<text x="749.0" y="1158" class="small bold" text-anchor="middle">② 未发状态由新状态替换</text>
+<rect x="1032" y="1120" width="390" height="60" rx="12" fill="#eef3fb"/>
+<text x="1227.0" y="1158" class="small bold" text-anchor="middle">③ 应用后再取最新状态</text>
+<path d="M479 1151L536 1151" stroke="#2563eb" stroke-width="4" fill="none" marker-end="url(#blue)"/>
+<path d="M958 1151L1015 1151" stroke="#2563eb" stroke-width="4" fill="none" marker-end="url(#blue)"/>
+<text x="76" y="1225" class="body">搭档绘制慢：房主继续计算，搭档跳到较新的状态；不补跑中间的游戏规则。</text>
+<text x="76" y="1264" class="small muted">切后台 / 真正断连：仍按双人合作策略暂停，避免另一人独自挨打。</text>
+<rect x="44" y="1316" width="1412" height="214" rx="20" fill="#e7edf6"/>
+<text x="72" y="1360" class="h">可靠性边界与代价</text>
+<text x="72" y="1401" class="body">房主专属状态通道；校验局代次、显示流与帧号，搭档不能提交生命或关卡结果。</text>
+<text x="72" y="1440" class="body">网络抖动时会短暂等待；插值增加显示延迟，房主处理开销和手机性能仍需实测。</text>
+<text x="72" y="1479" class="small muted">搭档冷重开直接恢复显示；房主页面重载仍需恢复规则，房主服务丢失会开新局。</text>
+<rect x="44" y="1554" width="1412" height="55" rx="12" fill="#192c43"/>
+<text x="750" y="1590" text-anchor="middle" style="fill:#fff;font-size:23px">同包自动配对 · 房主判定 · 两端本地原素材绘制 · 安卓真机性能尚未验证</text>
+</svg>
